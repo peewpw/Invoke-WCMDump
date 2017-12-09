@@ -23,7 +23,7 @@ function Invoke-WCMDump
 
 
     $source = @"
-    // C# heavily modified from https://github.com/spolnik/Simple.CredentialsManager
+    // C# modified from https://github.com/spolnik/Simple.CredentialsManager
 
     using Microsoft.Win32.SafeHandles;
     using System;
