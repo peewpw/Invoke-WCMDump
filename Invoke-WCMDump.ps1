@@ -1,5 +1,3 @@
-# Pulled from darkoperator's Posh-SecMod: 
-#   https://github.com/darkoperator/Posh-SecMod/blob/master/PostExploitation/PostExploitation.psm1
 function Invoke-WCMDump
 {
       <#
