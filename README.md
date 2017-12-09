@@ -3,6 +3,8 @@ PowerShell Script to Dump Windows Credentials from the Credential Manager
 
 Enumerates Windows credentials in the Credential Manager and then extracts available information about each one. Passwords are retrieved for "Generic" type credentials, but can not be retrived by the same method for "Domain" type credentials.
 
+Author: Barrett Adams (@peewpw)
+
 ## Example
 ```
 PS>Import-Module .\Invoke-WCMDump.ps1
