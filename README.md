@@ -1,7 +1,9 @@
 # Invoke-WCMDump
-PowerShell Script to Dump Windows Credentials from the Credential Manager
+PowerShell script to dump Windows credentials from the Credential Manager
 
-Enumerates Windows credentials in the Credential Manager and then extracts available information about each one. Passwords are retrieved for "Generic" type credentials, but can not be retrived by the same method for "Domain" type credentials.
+Invoke-WCMDump enumerates Windows credentials in the Credential Manager and then extracts available information about each one. Passwords are retrieved for "Generic" type credentials, but can not be retrived by the same method for "Domain" type credentials. Credentials are only returned for the current user.
+
+Does not require admin privileges!
 
 Author: Barrett Adams (@peewpw)
 
